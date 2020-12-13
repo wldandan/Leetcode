@@ -1,48 +1,43 @@
 package com.wl.dfs;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 class Solution694 {
 
-    private static int[]  dx = new int[]{ 0, 0, -1, 1};
-    private static int[] dy = new int[]{ 1, -1, 0, 0};
-
+    /*
+    * 1)使用StringBuffer,存储岛屿区域内节点与起始点的差值,从而使用Set判断去重
+    * 2)DFS,将传入的节点作验证,验证有效的节点设置为0,保存差值
+    * */
 
     public int numDistinctIslands(int[][] grid) {
-        Queue<int[]> queue = new LinkedList<>();
         Set<String> islands = new HashSet<>();
-        int res = 0;
+
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[0].length; j++) {
                 if (grid[i][j] == 1) {
-                    islands.add(generateIsland(grid, queue, i, j));
+                    StringBuffer island = new StringBuffer();
+                    generateIsland(grid, island, i, j, i, j);
+                    islands.add(island.toString());
                 }
             }
         }
         return islands.size();
     }
 
-    private String generateIsland(int[][] grid, Queue<int[]> queue, int i, int j) {
-        queue.add(new int[]{i,j});
-        StringBuffer Island = new StringBuffer();
+    private void generateIsland(int[][] grid, StringBuffer island, int i, int j, int startX, int startY) {
+        if (!isValid(grid, i, j)) return;
 
-        while(!queue.isEmpty()) {
-            int[] curr = queue.poll();
-            int x = curr[0];
-            int y = curr[1];
-            Island.append(x-i);
-            Island.append(y-j);
-            grid[x][y] = 0;
+        grid[i][j] = 0; //表示当前已处理
 
-            for (int k = 0; k < 4; k++) {
-                int newX = x + dx[k];
-                int newY = y + dy[k];
-                if (isValid(grid,newX, newY)) {
-                    queue.add(new int[]{newX, newY});
-                }
-            }
-        }
-        return Island.toString();
+        island.append(i - startX); //记录相对坐标
+        island.append(j - startY); //记录相对坐标
+
+        generateIsland(grid, island, i-1, j, startX, startY); //上
+        generateIsland(grid, island, i+1, j, startX, startY); //下
+        generateIsland(grid, island, i, j-1, startX, startY); //左
+        generateIsland(grid, island, i, j+1, startX, startY); //右
+
     }
 
     private boolean isValid(int[][] grid, int newX, int newY) {
